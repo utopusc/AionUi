@@ -56,7 +56,11 @@ const ContextUsageIndicator: React.FC<ContextUsageIndicatorProps> = ({
       };
     }
 
-    const pct = (total / context_limit) * 100;
+    // Clamp to 0-100 (issue #4210): some ACP backends report `used` as a
+    // CUMULATIVE provider metric (e.g. lifetime input tokens) rather than the
+    // current-context estimate, which would otherwise grow unbounded past
+    // 100% (up to +900%) and make the warning/danger states meaningless.
+    const pct = Math.min(100, Math.max(0, (total / context_limit) * 100));
 
     return {
       percentage: pct,
