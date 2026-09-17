@@ -1625,7 +1625,15 @@ const SendBox: React.FC<{
           setInput(finalMessage);
         }
       })
-      .catch(() => {})
+      .catch(() => {
+        // Issue #4242: a rejected send must not silently destroy user input.
+        // Restore the submitted prompt only when the composer is still in the
+        // post-send empty state; never overwrite newer text the user typed
+        // while the send was in flight (latestInputRef tracks the live value).
+        if (latestInputRef.current === '') {
+          setInput(finalMessage);
+        }
+      })
       .finally(() => {
         setIsLoading(false);
       });
